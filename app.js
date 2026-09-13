@@ -1,5 +1,4 @@
-// Motion RP multi-video YouTube loading screen.
-// These are the 27 YouTube videos supplied by the server owner.
+// Motion RP V7: clean YouTube player, no playlist box, previous/next switching, animated reactive visuals.
 const TRACKS = [
   { id: '0ftgAyfFUMc', title: 'TRACK 01' },
   { id: 'vyxSJr_CC60', title: 'TRACK 02' },
@@ -27,7 +26,7 @@ const TRACKS = [
   { id: 'oro2A3UwlmA', title: 'TRACK 24' },
   { id: 'YYEETzzqFiM', title: 'TRACK 25' },
   { id: 'b0Zm3DOoJn8', title: 'TRACK 26' },
-  { id: 'lehtwEA9IU4', title: 'TRACK 27' },
+  { id: 'lehtwEA9IU4', title: 'TRACK 27' }
 ];
 
 const EMBED_BASE = 'https://www.youtube.com/embed/';
@@ -35,11 +34,13 @@ let currentIndex = 0;
 let muted = true;
 let playing = false;
 let frameReady = false;
+let lastProgress = 0;
+let fallback = 0;
 
 const iframe = document.getElementById('youtubeVideo');
 const trackTitle = document.getElementById('trackTitle');
+const playerTrack = document.getElementById('playerTrack');
 const trackCount = document.getElementById('trackCount');
-const playlist = document.getElementById('playlist');
 const playBtn = document.getElementById('playBtn');
 const muteBtn = document.getElementById('muteBtn');
 const prevBtn = document.getElementById('prevBtn');
@@ -49,163 +50,71 @@ const volText = document.getElementById('volText');
 const status = document.getElementById('status');
 const videoLoading = document.getElementById('videoLoading');
 const hint = document.getElementById('hint');
-
-function pad(n) { return String(n + 1).padStart(2, '0'); }
-
-function videoUrl(id) {
-  return `${EMBED_BASE}${id}?autoplay=1&mute=1&controls=1&playsinline=1&rel=0&modestbranding=1&enablejsapi=1&iv_load_policy=3&origin=https%3A%2F%2Fcfx-nui-motion_rp_v1&widget_referrer=https%3A%2F%2Fcfx-nui-motion_rp_v1`;
-}
-
-function sendCommand(func, args = []) {
-  if (!iframe.contentWindow) return;
-  iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func, args }), '*');
-}
-
-function renderPlaylist() {
-  playlist.innerHTML = '';
-  TRACKS.forEach((track, i) => {
-    const b = document.createElement('button');
-    b.className = 'track-btn' + (i === currentIndex ? ' active' : '');
-    b.textContent = pad(i) + '  ' + track.title;
-    b.addEventListener('click', () => loadTrack(i, true));
-    playlist.appendChild(b);
-  });
-}
-
-function updateUI() {
-  const track = TRACKS[currentIndex];
-  trackTitle.textContent = track.title;
-  trackCount.textContent = `${pad(currentIndex)} / ${TRACKS.length}`;
-  muteBtn.textContent = muted ? '🔇' : '🔊';
-  playBtn.textContent = playing ? 'Ⅱ' : '▶';
-  document.querySelectorAll('.track-btn').forEach((b, i) => b.classList.toggle('active', i === currentIndex));
-}
-
-function loadTrack(index, userInitiated = false) {
-  currentIndex = (index + TRACKS.length) % TRACKS.length;
-  const id = TRACKS[currentIndex].id;
-  frameReady = false;
-  playing = false;
-  muted = true;
-  videoLoading.style.display = 'flex';
-  hint.textContent = userInitiated ? 'VIDEO CHANGED — CLICK 🔊 FOR AUDIO' : 'VIDEO AUTOPLAYS MUTED — CLICK 🔊 FOR AUDIO';
-  status.textContent = `LOADING ${TRACKS[currentIndex].title}...`;
-  iframe.src = videoUrl(id);
-  updateUI();
-}
-
-iframe.addEventListener('load', () => {
-  frameReady = true;
-  videoLoading.style.display = 'none';
-  // Start muted for autoplay compatibility.
-  sendCommand('mute');
-  sendCommand('setVolume', [Number(volume.value)]);
-  sendCommand('playVideo');
-  playing = true;
-  muted = true;
-  status.textContent = `MOTION CITY • ${TRACKS[currentIndex].title} • HD AUTO`;
-  updateUI();
-});
-
-playBtn.addEventListener('click', () => {
-  if (!frameReady) return;
-  if (playing) {
-    sendCommand('pauseVideo');
-    playing = false;
-    status.textContent = `MOTION CITY • ${TRACKS[currentIndex].title} PAUSED`;
-  } else {
-    sendCommand('playVideo');
-    playing = true;
-    status.textContent = `MOTION CITY • ${TRACKS[currentIndex].title} PLAYING`;
-  }
-  updateUI();
-});
-
-muteBtn.addEventListener('click', () => {
-  if (!frameReady) return;
-  if (muted) {
-    sendCommand('unMute');
-    sendCommand('setVolume', [Number(volume.value)]);
-    muted = false;
-    status.textContent = 'MOTION CITY • AUDIO ON';
-    hint.textContent = 'AUDIO ON • USE THE SLIDER TO ADJUST VOLUME';
-  } else {
-    sendCommand('mute');
-    muted = true;
-    status.textContent = 'MOTION CITY • AUDIO MUTED';
-    hint.textContent = 'VIDEO PLAYING MUTED';
-  }
-  updateUI();
-});
-
-volume.addEventListener('input', () => {
-  const v = Number(volume.value);
-  volText.textContent = `${v}%`;
-  sendCommand('setVolume', [v]);
-  if (v === 0) {
-    sendCommand('mute');
-    muted = true;
-  } else if (!muted) {
-    sendCommand('unMute');
-  }
-  updateUI();
-});
-
-prevBtn.addEventListener('click', () => loadTrack(currentIndex - 1, true));
-nextBtn.addEventListener('click', () => loadTrack(currentIndex + 1, true));
-
-window.addEventListener('message', (e) => {
-  if (typeof e.data !== 'string') return;
-  try {
-    const data = JSON.parse(e.data);
-    if (data.event === 'onAutoplayBlocked') {
-      playing = false;
-      playBtn.textContent = '▶';
-      status.textContent = 'CLICK ▶ TO PLAY VIDEO';
-    }
-  } catch (_) {}
-});
-
-// FiveM load progress.
-let fake = 0;
-let fallbackTimer;
+const reactiveStrip = document.getElementById('reactiveStrip');
+const heroEq = document.getElementById('heroEq');
+const videoCard = document.getElementById('videoCard');
+const ambientPulse = document.getElementById('ambientPulse');
+const playerLabel = document.getElementById('playerLabel');
+const videoStatus = document.getElementById('videoStatus');
 const bar = document.getElementById('barFill');
 const percent = document.getElementById('percent');
 const steps = [document.getElementById('s1'), document.getElementById('s2'), document.getElementById('s3'), document.getElementById('s4')];
 
-function setProgress(v) {
-  v = Math.max(0, Math.min(100, Math.round(v)));
-  bar.style.width = v + '%';
-  percent.textContent = v + '%';
-  const labels = [[0,'CONNECTING TO MOTION CITY...'],[25,'LOADING ASSETS...'],[55,'STARTING SCRIPTS...'],[80,'FINALIZING CITY...'],[100,'WELCOME TO MOTION CITY']];
-  let msg = labels[0][1];
-  labels.forEach(([n,t]) => { if (v >= n) msg = t; });
-  if (!status.textContent.includes('CLICK ▶')) {
-    // Preserve playback notices while the loadscreen is still loading.
-    if (!status.textContent.includes('AUDIO') && !status.textContent.includes('PAUSED') && !status.textContent.includes('PLAYING')) {
-      status.textContent = msg;
-    }
-  }
-  steps.forEach((s,i) => {
-    s.classList.remove('active','done');
-    const threshold = [0,25,55,80][i];
-    const clean = s.textContent.replace(/^[✓○◉]\s*/, '');
-    if (v >= threshold + 25 && i < 3) { s.classList.add('done'); s.textContent = '✓ ' + clean; }
-    else if (v >= threshold) { s.classList.add('active'); s.textContent = '◉ ' + clean; }
-    else s.textContent = '○ ' + clean;
-  });
+for (let i=0;i<48;i++){ const s=document.createElement('span'); s.className='reactive-bar'; reactiveStrip.appendChild(s); }
+for (let i=0;i<36;i++){ const s=document.createElement('i'); heroEq.appendChild(s); }
+const reactiveBars=[...reactiveStrip.children], heroBars=[...heroEq.children];
+
+function pad(n){return String(n+1).padStart(2,'0');}
+function videoUrl(id){
+  return `${EMBED_BASE}${id}?autoplay=1&mute=1&controls=1&playsinline=1&rel=0&modestbranding=1&enablejsapi=1&iv_load_policy=3&origin=https%3A%2F%2Fallrealprof976-ai.github.io&widget_referrer=https%3A%2F%2Fallrealprof976-ai.github.io`;
 }
-
-window.addEventListener('message', e => {
-  if (e.data?.eventName === 'loadProgress') {
-    clearInterval(fallbackTimer);
-    setProgress((e.data.loadFraction || 0) * 100);
-  }
+function sendCommand(func,args=[]){ if(iframe.contentWindow) iframe.contentWindow.postMessage(JSON.stringify({event:'command',func,args}),'*'); }
+function updateUI(){
+  const t=TRACKS[currentIndex];
+  trackTitle.textContent=t.title; playerTrack.textContent=t.title; trackCount.textContent=`${pad(currentIndex)} / ${TRACKS.length}`;
+  muteBtn.textContent=muted?'🔇':'🔊'; playBtn.textContent=playing?'Ⅱ':'▶';
+}
+function loadTrack(index,user=false){
+  currentIndex=(index+TRACKS.length)%TRACKS.length; frameReady=false; playing=false; muted=true;
+  videoLoading.style.display='flex'; videoStatus.textContent='LOADING'; playerLabel.textContent='SWITCHING';
+  hint.textContent=user?'VIDEO CHANGED — CLICK 🔊 FOR AUDIO':'VIDEO STARTS MUTED — CLICK 🔊 FOR AUDIO';
+  status.textContent=`LOADING ${TRACKS[currentIndex].title}...`;
+  videoCard.classList.remove('switching'); void videoCard.offsetWidth; videoCard.classList.add('switching');
+  iframe.src=videoUrl(TRACKS[currentIndex].id); updateUI();
+}
+iframe.addEventListener('load',()=>{
+  frameReady=true; videoLoading.style.display='none'; videoStatus.textContent='MOTION AUDIO'; playerLabel.textContent='PLAYING';
+  sendCommand('mute'); sendCommand('setVolume',[Number(volume.value)]); sendCommand('playVideo');
+  playing=true; muted=true; status.textContent=`MOTION CITY • ${TRACKS[currentIndex].title} • HD AUTO`; updateUI();
 });
+playBtn.addEventListener('click',()=>{ if(!frameReady)return; if(playing){sendCommand('pauseVideo');playing=false;playerLabel.textContent='PAUSED';status.textContent=`MOTION CITY • ${TRACKS[currentIndex].title} PAUSED`;}else{sendCommand('playVideo');playing=true;playerLabel.textContent='PLAYING';status.textContent=`MOTION CITY • ${TRACKS[currentIndex].title} PLAYING`;} updateUI();});
+muteBtn.addEventListener('click',()=>{if(!frameReady)return;if(muted){sendCommand('unMute');sendCommand('setVolume',[Number(volume.value)]);muted=false;hint.textContent='AUDIO ON • VOLUME CONTROL ACTIVE';status.textContent='MOTION CITY • AUDIO ON';}else{sendCommand('mute');muted=true;hint.textContent='VIDEO PLAYING MUTED';status.textContent='MOTION CITY • AUDIO MUTED';}updateUI();});
+volume.addEventListener('input',()=>{const v=Number(volume.value);volText.textContent=`${v}%`;sendCommand('setVolume',[v]);if(v===0){sendCommand('mute');muted=true;}else if(!muted){sendCommand('unMute');}updateUI();});
+prevBtn.addEventListener('click',()=>loadTrack(currentIndex-1,true));
+nextBtn.addEventListener('click',()=>loadTrack(currentIndex+1,true));
 
-fallbackTimer = setInterval(() => {
-  if (fake < 92) { fake += Math.random() * 2.5; setProgress(fake); }
-}, 400);
+function animateReactive(now){
+  const t=now/170; const boost=playing?(muted?0.72:1.0):0.28;
+  reactiveBars.forEach((b,i)=>{const wave=(Math.sin(t+i*0.62)+Math.sin(t*0.61+i*0.19)+2)/4; const h=10+wave*(82-(i%7)*5)*boost; b.style.height=`${Math.max(8,Math.min(94,h))}%`;});
+  heroBars.forEach((b,i)=>{const wave=(Math.sin(t*1.18+i*.34)+Math.sin(t*.57+i*.77)+2)/4; b.style.height=`${8+wave*(playing?88:32)}%`;});
+  const pulse=playing?(0.18+0.12*((Math.sin(t*.95)+1)/2)):.08; ambientPulse.style.opacity=pulse.toFixed(2);
+  videoCard.style.setProperty('--pulse', (0.12+0.1*((Math.sin(t*.9)+1)/2)).toFixed(3));
+  requestAnimationFrame(animateReactive);
+}
+requestAnimationFrame(animateReactive);
 
-renderPlaylist();
-loadTrack(0, false);
+function setProgress(v){
+  v=Math.max(0,Math.min(100,Math.round(v))); lastProgress=v; bar.style.width=v+'%'; percent.textContent=v+'%';
+  const thresholds=[0,25,55,80]; const labels=['INITIALIZING','LOADING ASSETS','STARTING SCRIPTS','ENTERING MOTION CITY'];
+  steps.forEach((s,i)=>{s.classList.remove('active','done');if(v>=thresholds[i]+25&&i<3){s.classList.add('done');s.textContent='✓ '+labels[i];}else if(v>=thresholds[i]){s.classList.add('active');s.textContent='◉ '+labels[i];}else s.textContent='○ '+labels[i];});
+}
+window.addEventListener('message',e=>{if(e.data?.eventName==='loadProgress'){const v=(e.data.loadFraction||0)*100;fallback=v;setProgress(v);}});
+setInterval(()=>{
+  if(lastProgress<100){
+    // Keep the line visibly moving even if FiveM does not emit progress events to the hosted page.
+    fallback=Math.min(96, Math.max(fallback,lastProgress)+0.8+Math.random()*1.8);
+    setProgress(fallback);
+  }
+},500);
+render();
+function render(){loadTrack(0,false);}
