@@ -9,30 +9,45 @@
 </head>
 <body>
   <div class="backdrop"></div>
+  <div class="city-glow glow-1"></div><div class="city-glow glow-2"></div><div class="city-glow glow-3"></div>
+  <div class="particle-field" id="particles"></div>
   <div class="aurora"></div>
   <div class="vignette"></div>
   <div class="grain"></div>
   <div class="scanlines"></div>
+  <div class="sweep"></div>
 
   <header class="header">
-    <div class="brand-mini"><span class="dot"></span><b>MOTION CITY</b><span>ROLEPLAY</span></div>
+    <div class="brand-mini"><span class="live-dot"></span><b>MOTION CITY</b><span>ROLEPLAY</span></div>
     <a class="discord" href="https://discord.gg/REPLACE_ME" target="_blank" rel="noreferrer">
       <span><b>JOIN OUR DISCORD</b><small>STAY CONNECTED • GET UPDATES</small></span><strong>→</strong>
     </a>
   </header>
 
-  <!-- Invisible YouTube player: it supplies the background music only. -->
-  <div class="youtube-audio" aria-hidden="true"><div id="youtubePlayer"></div></div>
-
-  <!-- Minimal music controls: no panel/box, just buttons floating over the background. -->
-  <div class="mini-controls" aria-label="Background music controls">
-    <button class="mini-btn" id="prevBtn" title="Previous track">◀</button>
-    <button class="mini-btn play" id="playBtn" title="Play/Pause">▶</button>
-    <button class="mini-btn" id="nextBtn" title="Next track">▶</button>
-    <button class="mini-btn" id="muteBtn" title="Mute/Unmute">🔇</button>
-    <input id="volume" type="range" min="0" max="100" value="60" aria-label="Music volume">
-    <span id="volText">60%</span>
-  </div>
+  <!-- Visible YouTube music/video panel. It also supplies the background audio. -->
+  <section class="music-card" aria-label="Motion RP music player">
+    <div class="music-head">
+      <div>
+        <span class="eyebrow">NOW PLAYING</span>
+        <h2 id="trackTitle">TRACK 01</h2>
+      </div>
+      <span class="live-pill"><i></i> LIVE</span>
+    </div>
+    <div class="video-frame">
+      <div id="youtubePlayer"></div>
+      <div class="video-overlay"></div>
+      <div class="equalizer" id="equalizer"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+    </div>
+    <div class="music-controls">
+      <button id="prevBtn" class="ctrl" title="Previous">◀</button>
+      <button id="playBtn" class="ctrl primary" title="Play/Pause">▶</button>
+      <button id="nextBtn" class="ctrl" title="Next">▶</button>
+      <button id="muteBtn" class="ctrl" title="Mute/Unmute">🔇</button>
+      <input id="volume" type="range" min="0" max="100" value="60" aria-label="Volume">
+      <span id="volText">60%</span>
+    </div>
+    <div class="track-meta"><span id="trackCount">01 / 27</span><span>VIDEO + AUDIO</span></div>
+  </section>
 
   <section class="quick">
     <h3>QUICK TIPS</h3>
@@ -40,10 +55,10 @@
   </section>
 
   <section class="loading">
-    <div class="loading-row"><span>LOADING...</span><b id="percent">0%</b></div>
+    <div class="loading-row"><span>LOADING CITY...</span><b id="percent">0%</b></div>
     <div class="bar"><div id="barFill"></div></div>
     <div class="steps">
-      <span class="done" id="s1">✓ INITIALIZING</span>
+      <span class="active" id="s1">◉ INITIALIZING</span>
       <span id="s2">○ LOADING ASSETS</span>
       <span id="s3">○ STARTING SCRIPTS</span>
       <span id="s4">○ ENTERING MOTION CITY</span>
