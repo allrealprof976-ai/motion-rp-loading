@@ -4,66 +4,40 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <title>Motion City | Motion RP</title>
+  <title>Motion City | Loading</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="backdrop"></div>
-  <div class="ambient-pulse" id="ambientPulse"></div>
+  <div class="aurora"></div>
   <div class="vignette"></div>
   <div class="grain"></div>
   <div class="scanlines"></div>
 
   <header class="header">
-    <div class="brand-mini"><span class="fivem-mark">△</span><b>FIVEM</b><span>|</span><span>ROLEPLAY</span><span>•</span><span>COMMUNITY</span><span>•</span><span>MOTION CITY</span></div>
+    <div class="brand-mini"><span class="dot"></span><b>MOTION CITY</b><span>ROLEPLAY</span></div>
     <a class="discord" href="https://discord.gg/REPLACE_ME" target="_blank" rel="noreferrer">
       <span><b>JOIN OUR DISCORD</b><small>STAY CONNECTED • GET UPDATES</small></span><strong>→</strong>
     </a>
   </header>
 
-  <section class="video-card" id="videoCard">
-    <div class="video-head">
-      <span>NOW PLAYING</span>
-      <b id="trackTitle">TRACK 01</b>
-    </div>
-    <div class="video-wrap" id="videoWrap">
-      <iframe id="youtubeVideo" title="Motion RP Music Video" frameborder="0"
-        allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-      <div class="video-shine"></div>
-      <div class="video-edge-pulse"></div>
-      <div class="video-loading" id="videoLoading">LOADING VIDEO…</div>
-      <div class="video-status-pill" id="videoStatus">MOTION AUDIO</div>
-    </div>
+  <!-- Invisible YouTube player: it supplies the background music only. -->
+  <div class="youtube-audio" aria-hidden="true"><div id="youtubePlayer"></div></div>
 
-    <div class="mini-player">
-      <div class="mini-top">
-        <div class="mini-meta"><span class="live-dot"></span><span id="playerLabel">PLAYING</span><b id="playerTrack">TRACK 01</b></div>
-        <span id="trackCount">01 / 27</span>
-      </div>
-      <div class="reactive-strip" id="reactiveStrip" aria-hidden="true"></div>
-      <div class="player-row">
-        <button class="ctrl" id="prevBtn" title="Previous">◀</button>
-        <button class="ctrl play" id="playBtn" title="Play/Pause">▶</button>
-        <button class="ctrl" id="nextBtn" title="Next">▶</button>
-        <button class="ctrl" id="muteBtn" title="Mute/Unmute">🔇</button>
-        <input id="volume" type="range" min="0" max="100" value="55" aria-label="Volume">
-        <span id="volText">55%</span>
-      </div>
-    </div>
-  </section>
+  <!-- Minimal music controls: no panel/box, just buttons floating over the background. -->
+  <div class="mini-controls" aria-label="Background music controls">
+    <button class="mini-btn" id="prevBtn" title="Previous track">◀</button>
+    <button class="mini-btn play" id="playBtn" title="Play/Pause">▶</button>
+    <button class="mini-btn" id="nextBtn" title="Next track">▶</button>
+    <button class="mini-btn" id="muteBtn" title="Mute/Unmute">🔇</button>
+    <input id="volume" type="range" min="0" max="100" value="60" aria-label="Music volume">
+    <span id="volText">60%</span>
+  </div>
 
-  <main class="hero">
-    <div class="logo-kicker">MOTION CITY</div>
-    <div class="logo">MOTION<span>RP</span></div>
-    <div class="tagline">REAL PEOPLE • REAL STORIES • MOTION CITY</div>
-    <div class="hero-eq" id="heroEq" aria-hidden="true"></div>
-  </main>
-
-  <aside class="quick">
+  <section class="quick">
     <h3>QUICK TIPS</h3>
     <p>Use <b>/me</b> for actions, <b>/do</b> for narration, and <b>/ooc</b> for out-of-character chat.</p>
-  </aside>
+  </section>
 
   <section class="loading">
     <div class="loading-row"><span>LOADING...</span><b id="percent">0%</b></div>
@@ -77,7 +51,6 @@
   </section>
 
   <div class="status" id="status">CONNECTING TO MOTION CITY...</div>
-  <div class="hint" id="hint">VIDEO STARTS MUTED — CLICK 🔊 FOR AUDIO</div>
   <script src="app.js"></script>
 </body>
 </html>
