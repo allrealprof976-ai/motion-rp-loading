@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Motion City | Motion RP</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="backdrop"></div>
+  <div class="vignette"></div>
+  <div class="grain"></div>
+  <div class="scanlines"></div>
+
+  <header class="header">
+    <div class="brand-mini"><span class="fivem-mark">△</span><b>FIVEM</b><span>|</span><span>ROLEPLAY</span><span>•</span><span>COMMUNITY</span><span>•</span><span>MOTION CITY</span></div>
+    <a class="discord" href="https://discord.gg/REPLACE_ME" target="_blank" rel="noreferrer">
+      <span class="discord-icon">◉</span><span><b>JOIN OUR DISCORD</b><small>STAY CONNECTED • GET UPDATES</small></span><strong>→</strong>
+    </a>
+  </header>
+
+  <section class="video-card" id="videoCard">
+    <div class="video-head">
+      <span>NOW PLAYING</span>
+      <b id="trackTitle">TRACK 01</b>
+    </div>
+    <div class="video-wrap" id="videoWrap">
+      <iframe id="youtubeVideo" title="Motion RP Music Video" frameborder="0"
+        allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen></iframe>
+      <div class="video-shine"></div>
+      <div class="video-loading" id="videoLoading">LOADING VIDEO…</div>
+    </div>
+    <div class="player-row">
+      <button class="ctrl" id="prevBtn" title="Previous">◀</button>
+      <button class="ctrl play" id="playBtn" title="Play/Pause">▶</button>
+      <button class="ctrl" id="nextBtn" title="Next">▶</button>
+      <button class="ctrl" id="muteBtn" title="Mute/Unmute">🔇</button>
+      <input id="volume" type="range" min="0" max="100" value="55" aria-label="Volume">
+      <span id="volText">55%</span>
+      <span class="track-count" id="trackCount">01 / 27</span>
+    </div>
+    <div class="playlist" id="playlist"></div>
+  </section>
+
+  <main class="hero">
+    <div class="logo-kicker">MOTION CITY</div>
+    <div class="logo">MOTION<span>RP</span></div>
+    <div class="tagline">REAL PEOPLE • REAL STORIES • MOTION CITY</div>
+  </main>
+
+  <aside class="quick">
+    <h3>💡 QUICK TIPS</h3>
+    <p>Use <b>/me</b> for actions, <b>/do</b> for narration, and <b>/ooc</b> for out-of-character chat.</p>
+  </aside>
+
+  <section class="loading">
+    <div class="loading-row"><span>LOADING...</span><b id="percent">0%</b></div>
+    <div class="bar"><div id="barFill"></div></div>
+    <div class="steps">
+      <span class="done" id="s1">✓ INITIALIZING</span>
+      <span id="s2">○ LOADING ASSETS</span>
+      <span id="s3">○ STARTING SCRIPTS</span>
+      <span id="s4">○ ENTERING MOTION CITY</span>
+    </div>
+  </section>
+
+  <div class="status" id="status">CONNECTING TO MOTION CITY...</div>
+  <div class="hint" id="hint">VIDEO AUTOPLAYS MUTED — CLICK 🔊 FOR AUDIO</div>
+
+  <script src="app.js"></script>
+</body>
+</html>
